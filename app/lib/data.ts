@@ -39,6 +39,12 @@ export async function fetchLatestInvoices() {
   noStore();
 
   try {
+    // NOTE データの取得が遅れた場合を再現するための記述
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    console.log('Data fetch complete after 3 seconds.');
+
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
