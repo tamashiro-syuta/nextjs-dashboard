@@ -1,3 +1,5 @@
+// NOTE DBやAPIが準備できる前に挙動を確認できるように、仮のデータを用意している
+
 // This file contains placeholder data that you'll be replacing with real data in the Data Fetching chapter:
 // https://nextjs.org/learn/dashboard-app/fetching-data
 const users = [
