@@ -1,5 +1,49 @@
-## Next.js App Router Course - Final
+# Next.js(App Router) の公式チュートリアル
+- https://nextjs.org/learn/dashboard-app
 
-This is the final template for the Next.js App Router Course. It contains the final code for the dashboard application.
+以下、各章のメモ
 
-For more information, see the [course curriculum](https://nextjs.org/learn) on the Next.js Website.
+## CSS Style
+### Tailwind
+- Tailwind用のスタイルを用意していて、それにするとglobal.cssに設定済みになる
+  - `/app/layout.tsx` には自分でimportする必要あり
+
+### CSS Modules
+- CSS モジュールを 使用すると、一意のクラス名を自動的に作成することで CSS の範囲をコンポーネントに設定できるため、名前の衝突を心配する必要がなくなる
+- サンプルでは`/app/ui/home.module.css`って命名していたから、`〇〇.modules.css`ってするのが一般的と思われる
+
+### clsx
+- `clsx`っていうライブラリを使うと、条件分岐しながらスタイルをかけるから複雑なスタイリングしやすくなるっぽい (他のCSSinJSとあんまり変わらない印象)
+- 公式ではサンプルだから下の感じでやってたけど、実際使う時は`className`に直接書かずに、スタイルの条件をカプセル化した方が良いかも
+  ```javascript
+  className={clsx(
+    'inline-flex items-center rounded-full px-2 py-1 text-sm',
+    {
+      'bg-gray-100 text-gray-500': status === 'pending',
+      'bg-green-500 text-white': status === 'paid',
+    },
+  )}
+  ```
+
+## フォントと画像の最適化
+### フォント
+- **【 結論: `next/font` を使え 】**
+- ブラウザでは最初にフォールバックフォント or システムフォントでテキストをレンダリング
+- それが読み込まれるとカスタムフォントに置き換わるときに発生する
+- この入れ替えによって、テキストのサイズ、間隔、レイアウトが変更され、周囲の要素が移動することがある
+- next.jsは、next/fontモジュールを使用すると、アプリケーション内のフォントを自動的に最適化する
+- これは、ビルド時にフォントファイルをダウンロードし、他の静的アセットと一緒にホスティングすることによって行われる
+- つまり、ユーザーがアプリケーションにアクセスしたときに、パフォーマンスに影響するようなフォントの追加ネットワークリクエストが発生しない
+
+### 画像
+- **【 結論: `next/image` を使え 】**
+- `next/image`は以下の機能を自動で行う
+  - 画像読み込み時に自動的にレイアウトがずれるのを防ぐ
+  - 小さなビューポートを備えたデバイスに大きな画像が送信されるのを避けるために、画像のサイズを変更する
+  - デフォルトで画像を遅延読み込み (画像はビューポートに入るときに読み込まれる)
+  - WebPやAVIなどの最新の形式で画像を提供(※ブラウザがサポートしている場合)
+  - 画像のサイズをheightプロパティとwidthプロパティで指定するのはベストプラクティス
+  - デバイスのサイズごとに画像のサイズ等を変更したい時は、`Image`コンポーネントを複数用意して、`tailwind`の`hidden`などで出し分けるのもあり
+
+## layoutとpageの作成
+- layoutは配下のコンポーネントへ遷移する際は再レンダリングされずに最適化される(`partial rendering`)
