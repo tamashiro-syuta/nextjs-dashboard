@@ -147,3 +147,28 @@
   - `usePathname` : 現在の URL のパス名を読み取ることができる
     - ex ) `/dashboard/invoices`の場合、`/dashboard/invoices`を返す
   - `useRouter` : **クライアント コンポーネント内のルート間のナビゲーション** をプログラムで有効にする。使用できる方法は複数ある
+
+## データの変更
+- `React Server Actions` : サーバー上で非同期コードを直接実行できる
+  - APIエンドポイントを作成する必要がなくなる
+  - 使用することでセキュリティも担保できる
+    - `<form>`を使用した例
+    - サーバーサイドで実行されるので、クライアント側でJavascriptが向こうの場合でも機能する
+    - 内部で`POST APIエンドポイント`を作成しているので、APIエンドポイントを作成する必要がない
+    ```typescript
+    // Server Component
+    export default function Page() {
+      // Action
+      async function create(formData: FormData) {
+        'use server';
+
+        // Logic to mutate data...
+      }
+
+      // Invoke the action using the "action" attribute
+      return <form action={create}>...</form>;
+    }
+    ```
+- ファイルに`'use server';`を追加することで、ファイル内で`export`された関数がサーバーアクションとしてサーバーサイドで実行される
+  - これらの関数は **クライアントコンポーネント** やサーバーコンポーネントから呼び出すことができる
+  - **クライアントコンポーネントからも呼び出せるのすごい!!!**
