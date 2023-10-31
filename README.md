@@ -205,3 +205,82 @@
   - `middleware.ts`で`NextAuth`を初期化して、middlewareとして登録する
     - Middleware を使用する利点は、Middleware が認証を確認するまで保護されたルートのレンダリングが開始されないため、アプリケーションのセキュリティとパフォーマンスの両方が向上すること
   - `bcrypt`が`Nodejs`に依存しており、`middleware.ts`では使えないので、`auth.ts`に認証周りのロジック(signIn, signOutなど)を記述(provider設定もここに記述)
+
+## メタデータの追加
+- メタデータはウェブページに関する追加的な詳細を提供
+- メタデータは、HTMLの`<head>`要素内に埋め込まれ、裏で機能する
+- メタデータはSEOを強化する上で重要
+  - 適切なメタデータは、検索エンジンがウェブページを効果的にインデックスし、検索結果でのランキングを向上させるのに役立つ
+  - `Open Graph`のようなメタデータは、ソーシャルメディア上で共有されたリンクの見栄えを改善し、コンテンツをユーザーにとってより魅力的で有益なものにする
+- Nextが提供するMetadata API を使って追加できる
+
+### メタデータの追加方法
+- 以下の2つの方法があるが、どちらのオプションでも、Next.jsはページの関連する`<head>`要素を自動的に生成する
+- 設定ベース：静的なメタデータオブジェクトまたは動的なgenerateMetadata関数をlayout.jsまたはpage.jsファイルにエクスポートする
+  - 静的なメタデータ
+    ```typescript
+    import type { Metadata } from 'next'
+
+    export const metadata: Metadata = {
+      title: 'Next.js',
+    }
+    ```
+  - 動的なgenerateMetadata関数
+    ```typescript
+    import { Metadata, ResolvingMetadata } from 'next'
+
+    type Props = {
+      params: { id: string }
+      searchParams: { [key: string]: string | string[] | undefined }
+    }
+
+    export async function generateMetadata(
+      { params, searchParams }: Props,
+      parent: ResolvingMetadata
+    ): Promise<Metadata> {
+      // read route params
+      const id = params.id
+
+      // fetch data
+      const product = await fetch(`https://.../${id}`).then((res) => res.json())
+
+      // optionally access and extend (rather than replace) parent metadata
+      const previousImages = (await parent).openGraph?.images || []
+
+      return {
+        title: product.title,
+        openGraph: {
+          images: ['/some-specific-page-image.jpg', ...previousImages],
+        },
+      }
+    }
+    ```
+- ファイルベース：Next.jsでは、以下のファイルはメタデータ用として認識される
+  - `favicon.ico`,`apple-icon.jpg`,`icon.jpg`：ファビコンやアイコンに使用
+  - `opengraph-image.jpg`,`twitter-image.jpg`：ソーシャルメディアの画像に使用
+  - `robots.txt`：検索エンジンのクロールを指示する
+  - `sitemap.xml`：ウェブサイトの構造に関する情報を提供
+- `app/layout.tsx`のメタデータは`app/layout.tsx`を使用している全ページに継承される
+- メタデータを更新したい場合は、ページでメタデータを追加すれば良い
+  - 入れ子になったページのメタデータは、親のメタデータを上書きされる
+- `template`を設定することで、共通部分をDRYに記述できる
+  ```typescript
+  export const metadata: Metadata = {
+    title: {
+      template: '%s | Acme Dashboard',
+      default: 'Acme Dashboard',
+    },
+    description: 'The official Next.js Learn Dashboard built with App Router.',
+    metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
+  };
+  ```
+  - テンプレート内の`%s`は特定のページタイトルに置き換えられる
+    - ex) `app/dashboard/invoices/page.tsx`で`title: 'Invoices',`とすると、タイトルは`Invoices | Acme Dashboard`になる
+
+### メタデータの紹介(一部)
+- Title : ブラウザのタブに表示されるタイトルを担当
+- Description : Webページのコンテンツの簡単な概要を提供し、多くの場合、検索エンジンの結果に表示される
+- Keyword : Webページのコンテンツに関連するキーワードが含まれており、検索エンジンがページをインデックスするのに役立つ
+- Open Graph :　SNSで共有される際のWebページの表現方法を強化し、タイトル、説明、プレビュー画像などの情報を提供
+  - [ImageResponseコンストラクタ](https://nextjs.org/docs/app/api-reference/functions/image-response)を使用すると、JSXやCSSを使用して動的な画像の生成が可能。`Open Graph` や Twitter カードなどのソーシャルメディア画像を生成するのに便利
+- Favicon : ブラウザのアドレスバー or タブに表示される小さなアイコン
