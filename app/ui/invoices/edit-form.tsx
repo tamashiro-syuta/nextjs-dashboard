@@ -15,11 +15,9 @@ export default function EditInvoiceForm({
   invoice,
   customers,
 }: {
-  invoice: InvoiceForm | undefined;
+  invoice: InvoiceForm;
   customers: CustomerField[];
   }) {
-
-  if (invoice === undefined) { return null }
 
   return (
     <form action={updateInvoice}>
