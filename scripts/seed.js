@@ -25,6 +25,7 @@ async function seedUsers() {
     // Insert data into the "users" table
     const insertedUsers = await Promise.all(
       users.map(async (user) => {
+        // パスワードをハッシュ化し、セキュリティ性を高めている
         const hashedPassword = await bcrypt.hash(user.password, 10);
         return sql`
         INSERT INTO users (id, name, email, password)
